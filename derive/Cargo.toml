@@ -1,0 +1,11 @@
+[package]
+name = "bevy_spawnable_derive"
+version = "0.1.0"
+edition = "2018"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "1"
+quote = "1"
