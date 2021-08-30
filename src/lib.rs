@@ -1,5 +1,5 @@
-use bevy_ecs::prelude::*;
-use bevy_ecs::system::EntityCommands;
+use bevy::::prelude::*;
+use bevy::::system::EntityCommands;
 pub use bevy_spawnable_derive::Spawnable;
 
 pub trait Spawnable {
