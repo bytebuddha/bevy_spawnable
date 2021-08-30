@@ -7,7 +7,7 @@ extern crate quote;
 use syn::spanned::Spanned;
 use proc_macro::TokenStream;
 
-#[proc_macro_derive(Spawnable, attributes(nested, bundle))]
+#[proc_macro_derive(Spawnable, attributes(child, bundle))]
 pub fn derive_breadcrumbs(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as syn::DeriveInput);
     let crate_path = quote! {::bevy_spawnable};
@@ -27,7 +27,7 @@ pub fn derive_breadcrumbs(input: TokenStream) -> TokenStream {
                         let _type = &field.ty;
                         if attr_ident == "bundle" {
                            bundles.push(quote! { #_ident });
-                       } else if attr_ident == "nested" {
+                       } else if attr_ident == "child" {
                            children.push(quote! { #_ident.spawn(&mut parent.spawn()); });
                         }
                     }
@@ -40,7 +40,7 @@ pub fn derive_breadcrumbs(input: TokenStream) -> TokenStream {
         _ =>  derive_input
                 .span()
                 .unwrap()
-                .error("BreadCrumbs can only be applied to enums and structs")
+                .error("Spawnable can only be derived from structs")
                 .emit()
     }
     let childs = if children.is_empty() {

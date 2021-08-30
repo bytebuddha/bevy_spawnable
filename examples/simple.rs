@@ -7,9 +7,9 @@ pub struct ComponentHierarchy {
     pub name: Name,
     #[bundle]
     pub node: NodeBundle,
-    #[nested]
+    #[child]
     pub component_a: ComponentA,
-    #[nested]
+    #[child]
     pub component_b: ComponentB
 }
 
@@ -18,7 +18,7 @@ pub struct ComponentA {
     pub name: Name,
     #[bundle]
     pub node: NodeBundle,
-    #[nested]
+    #[child]
     pub child: Child
 }
 
@@ -37,9 +37,9 @@ pub struct ComponentB {
     pub name: Name,
     #[bundle]
     pub node: NodeBundle,
-    #[nested]
+    #[child]
     pub child_one: Child,
-    #[nested]
+    #[child]
     pub child_two: Child
 }
 
