@@ -8,7 +8,7 @@ use syn::spanned::Spanned;
 use proc_macro::TokenStream;
 
 #[proc_macro_derive(Spawnable, attributes(child, bundle))]
-pub fn derive_breadcrumbs(input: TokenStream) -> TokenStream {
+pub fn derive_spawnable(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as syn::DeriveInput);
     let crate_path = quote! {::bevy_spawnable};
     let ident = &derive_input.ident;
@@ -22,17 +22,20 @@ pub fn derive_breadcrumbs(input: TokenStream) -> TokenStream {
             for field in &data.fields {
                 let _ident = &field.ident;
                 fields.push(field.ident.clone());
+                let mut has_attribute = false;
                 for attr in &field.attrs {
                     if let Some(attr_ident) = attr.path.get_ident() {
                         let _type = &field.ty;
                         if attr_ident == "bundle" {
                            bundles.push(quote! { #_ident });
-                       } else if attr_ident == "child" {
-                           children.push(quote! { #_ident.spawn(&mut parent.spawn()); });
+                           has_attribute = true;
+                        } else if attr_ident == "child" {
+                            children.push(quote! { #_ident.spawn(parent.spawn()); });
+                            has_attribute = true;
                         }
                     }
                 }
-                if field.attrs.is_empty() {
+                if !has_attribute {
                     components.push(quote! { #_ident });
                 }
             }
@@ -50,7 +53,7 @@ pub fn derive_breadcrumbs(input: TokenStream) -> TokenStream {
     };
     let output = quote! {
         impl #crate_path::Spawnable for #ident #generics {
-            fn spawn(self, commands: &mut ::bevy_ecs::system::EntityCommands) {
+            fn spawn(self, mut commands: ::bevy::ecs::world::EntityMut) {
                 let #ident { #(#fields,)* } = self;
                 commands
                     #(.insert(#components))*

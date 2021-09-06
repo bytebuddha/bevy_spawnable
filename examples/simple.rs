@@ -1,33 +1,38 @@
 use bevy::prelude::*;
 use bevy_devtools::{ DevToolsExt, DevToolsPlugin };
-use bevy_spawnable::Spawnable;
+use bevy_spawnable::{spawn, Spawnable};
 
-#[derive(Spawnable, Default)]
+#[derive(Spawnable)]
 pub struct ComponentHierarchy {
     pub name: Name,
-    #[bundle]
-    pub node: NodeBundle,
     #[child]
-    pub component_a: ComponentA,
+    pub component_one: ComponentA,
     #[child]
-    pub component_b: ComponentB
+    pub component_two: ComponentB
+}
+
+impl FromWorld for ComponentHierarchy {
+    fn from_world(world: &mut World) -> ComponentHierarchy {
+        ComponentHierarchy {
+            name: Name::new("Component Hierarchy"),
+            component_one: FromWorld::from_world(world),
+            component_two: FromWorld::from_world(world)
+        }
+    }
 }
 
 #[derive(Spawnable)]
 pub struct ComponentA {
     pub name: Name,
-    #[bundle]
-    pub node: NodeBundle,
     #[child]
     pub child: Child
 }
 
-impl Default for ComponentA {
-    fn default() -> ComponentA {
+impl FromWorld for ComponentA {
+    fn from_world(world: &mut World) -> ComponentA {
         ComponentA {
             name: Name::new("Component A"),
-            node: Default::default(),
-            child: Default::default(),
+            child: FromWorld::from_world(world)
         }
     }
 }
@@ -35,33 +40,31 @@ impl Default for ComponentA {
 #[derive(Spawnable)]
 pub struct ComponentB {
     pub name: Name,
-    #[bundle]
-    pub node: NodeBundle,
     #[child]
     pub child_one: Child,
     #[child]
     pub child_two: Child
 }
 
-impl Default for ComponentB {
-    fn default() -> ComponentB {
+impl FromWorld for ComponentB {
+    fn from_world(world: &mut World) -> ComponentB {
         ComponentB {
             name: Name::new("Component B"),
-            node: Default::default(),
-            child_one: Default::default(),
-            child_two: Default::default(),
+            child_one: FromWorld::from_world(world),
+            child_two: FromWorld::from_world(world)
         }
     }
 }
+
 
 #[derive(Spawnable)]
 pub struct Child {
     pub name: Name
 }
 
-impl Default for Child {
-    fn default() -> Child {
-        Child { name: "Child".into() }
+impl FromWorld for Child {
+    fn from_world(_: &mut World) -> Child {
+        Child { name: Name::new("Child") }
     }
 }
 
@@ -70,15 +73,6 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(DevToolsPlugin)
         .devtools_enabled()
-        .add_startup_system(spawn_entities.system())
+        .add_startup_system(spawn::<ComponentHierarchy>.exclusive_system())
         .run()
-}
-
-fn spawn_entities(mut commands: Commands) {
-    let entities = ComponentHierarchy {
-        name: Name::new("Component Hierarchy"),
-        ..Default::default()
-    };
-
-    entities.spawn(&mut commands.spawn());
 }
